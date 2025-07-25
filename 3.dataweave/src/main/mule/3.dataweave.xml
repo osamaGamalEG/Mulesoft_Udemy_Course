@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="dac64760-c395-44fc-a85d-5c2ed73f6381" >
+		<http:listener-connection host="0.0.0.0" port="8090" />
+	</http:listener-config>
+	<flow name="3.dataweaveFlow" doc:id="ee914f7c-2be6-4672-aa08-377f5d7f66d6" >
+		<ee:transform doc:name="Transform Message" doc:id="e23b6a00-42ab-4b29-9df9-3fcc1178a1b6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"new string": ("hello "++ "SALESFORCE")
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="JSON TO XML" doc:id="4254ca2e-a6f4-458d-bc96-8bccc4607dcc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+		"new string": ("hello "++ "SALESFORCE")
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="create var" doc:id="1874ffc9-b504-4745-b87a-7633b006e3e2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var vv = {
+	
+	"son": ("Anas "++"w"++" Elias")
+}
+output application/json
+---
+
+vv
+ ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="3.dataweaveFiles" doc:id="b927c1a3-823e-4668-9a54-458b9c88b73b" >
+		<ee:transform doc:name="Transform Message" doc:id="48ebeb6c-69dc-40f8-8929-bdc429419eb3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+output application/json
+---
+
+readUrl("classpath://people.json","application/json")
+ ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="3.dataweave.Arrays" doc:id="533289f2-d39f-468a-b3af-7b7fd31eb107" >
+		<ee:transform doc:name="array to json" doc:id="bfade4cb-88c0-4158-a6c6-8a9193fd3a21" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var arr=['Mohamed','Osama','Ahmed','Anas']
+
+output application/json
+---
+ arr map ((item,i)->
+ 	index : item ++ '_' ++ i
+ )]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="extract value from obj" doc:id="513ae813-84a2-478d-b3f3-189ec08bb541" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var customObj={
+	"0":"Appian",
+	"1":"Salesforce",
+	"2":"Mulesoft"
+	
+}
+
+output application/json
+---
+ 
+	customObj pluck ((value) -> value)
+ ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Filter Obj" doc:id="ad1c970d-c45f-44b1-9258-c6d413c1e892" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var customObj={
+	"0":"Appian",
+	"1":"Salesforce",
+	"2":"Mulesoft",
+	"3":"Aws"
+	
+}
+output application/json
+---
+
+  customObj filterObject((value)->
+    value contains "u"
+)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="3.dataweave.SELECTORS" doc:id="94a26a63-4113-48fd-97cf-58b43800365e" >
+		<ee:transform doc:name="Transform Message" doc:id="4b3dd5fc-8138-4333-ae6c-6d1a946dcbde" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var v= {
+  "people": {
+    "person": {
+      "name": "John"
+    },
+    "person": {
+      "name": "Mary"
+    },
+    "person": {
+      "name": "Tim"
+    },
+    "person": {
+      "name": "Ann"
+    },
+    "person": {
+      "name": "Dora"
+    }
+  }
+}
+
+
+output application/json
+---
+v.people.*person]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="3.dataweave.LAMBDA" doc:id="ac399bc4-8c9c-422c-b176-7f4ad286dad9" >
+		<http:listener doc:name="HTTP POST" doc:id="1721b54c-8a04-4d81-b562-845718385dc2" config-ref="HTTP_Listener_config" path="/lambda/" allowedMethods="POST"/>
+		<ee:transform doc:name="Transform Message" doc:id="f6be3053-95b6-48c0-bf88-ae5d5d965e6a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+fun CreateString(obj) = {
+	description: obj.field1 ++ ' ' ++ obj.field2 ++ ' '++ obj.field3 
+}
+
+output application/json
+---
+{
+	"root":CreateString(payload)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="3.dataweaveFlow1" doc:id="a0b86b0e-71e7-4f3a-acea-8d4f2477aa17" >
+		<ee:transform doc:name="Merge Arrays" doc:id="7a8d38b9-dfe0-4a2c-bada-3607e90d23b3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var books =[
+  {
+    "bookId": 101,
+    "title": "mulesoft course",
+    "price": "20.00"
+  },
+  {
+    "bookId": 201,
+    "title": "API Design Principles",
+    "price": "25.50"
+  },
+  {
+    "bookId": 301,
+    "title": "Cloud Integration Patterns",
+    "price": "30.00"
+  }
+]
+var authors=[
+	  {
+    "bookId": 101,
+    "author": "Ahmed Hady" 
+  },
+  {
+    "bookId": 201,
+   "author": "Mansour Ali" 
+  },
+  {
+    "bookId": 301,
+    "author": "Emad Farag" 
+  }
+]
+output application/json
+---
+
+books map(( item , index) ->
+		using(id =item.bookId)
+		{
+			Id: id ,
+			topic: item.title,
+			cost: item.price,
+			(authors filter((item)->item.bookId==id)
+		     map(item)-> 
+		     {"author": item.author}
+			)
+			 
+		} 
+	)
+	
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
