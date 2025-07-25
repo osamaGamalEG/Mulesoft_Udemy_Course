@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="Basic" doc:id="79d9f37a-8525-4f56-9905-1404405b8271" >
+		<http:listener doc:name="HTTP GET" doc:id="539bdd01-0010-4b75-9499-171c6d0758a7" config-ref="HTTP_Listener_config" path="/basics/*" allowedMethods="GET">
+			<http:response >
+				<http:body ><![CDATA[#[vars.requestResponse]]]></http:body>
+			</http:response>
+		</http:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="745e85bd-5f9e-41f0-a743-09b9e19ab6f5" message='#["oglog"++  flow.name]'/>
+		<set-payload value='#["Anas is the Star"]' doc:name="Set Payload" doc:id="d5c1adb7-87fa-40f9-a01f-18b4645a45ee" />
+		<set-variable value="#[{&#10;	'son1': 'Anas',&#10;	'son2': 'Elias',&#10;	'Dad' : 'Papa' &#10;}]" doc:name="Set params" doc:id="91b1b781-3f62-47bc-a3c2-00b7b323f73d" variableName="customVar"/>
+		<http:request method="GET" doc:name="Request" doc:id="897398dc-9e8e-4938-88c6-9f211236825e" path="/queryParams" target="requestResponse" config-ref="HTTP_Request_configuration">
+			<http:query-params ><![CDATA[#[output application/java
+---
+ vars.customVar]]]></http:query-params>
+		</http:request>
+	</flow>
+	<flow name="UriParams" doc:id="3a986ea2-e059-40dc-90ec-1c5068dd8b57" >
+		<http:listener doc:name="Listener" doc:id="05be6a37-744e-4a9e-9345-1f307e69a65e" config-ref="HTTP_Listener_config" path="/uriParam/{ID}" allowedMethods="GET"/>
+		<set-payload value='#[attributes.uriParams."ID"]' doc:name="Set Payload" doc:id="807f120c-7ad6-480e-88f5-3d6c317e11ff" />
+	</flow>
+	<flow name="queryParameters" doc:id="0e027c4e-b891-4621-a3d0-6b3fde5d6500" >
+		<http:listener doc:name="Listener" doc:id="0fadc862-27de-4bce-9e77-64ac713393eb" config-ref="HTTP_Listener_config" path="/queryParams/" allowedMethods="GET"/>
+		<set-payload value="#[%dw 2.0&#10;&#10;output  application/json&#10;---&#10;attributes.queryParams]" doc:name="Set Payload" doc:id="fdf0e324-5d6a-4364-b786-31951c4ebfca" />
+	</flow>
+</mule>
