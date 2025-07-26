@@ -1,0 +1,6 @@
+http:
+  "host": "localhost"
+  "port": "8090" 
+  "path": "/test1"
+
+"message": " yaml file configured by og"  
