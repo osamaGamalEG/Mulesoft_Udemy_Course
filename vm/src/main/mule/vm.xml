@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+	<flow name="vmFlow" doc:id="e1924fde-3987-4f28-9770-de0cd2ffc62f" >
+		<http:listener doc:name="publish message async" doc:id="b483c420-d458-442a-9387-99043f3bd26c" config-ref="HTTP_Listener_config" path="/async-basic" allowedMethods="POST"/>
+		<vm:publish doc:name="Publish" doc:id="6b3e95cb-8246-43ed-b3ce-5ccc65103016" config-ref="VM_Config" queueName="async.basic"/>
+	</flow>
+	<flow name="listen.TO.Async.Message" doc:id="29fa44c0-f289-456a-9156-5d5c37a9ff40" >
+		<vm:listener queueName="async.basic" doc:name="Listener" doc:id="86ae261f-cddc-40c1-bfd4-c645359f3f66" config-ref="VM_Config"/>
+		<flow-ref doc:name="Flow Reference" doc:id="34b45205-8bc8-4255-8360-525b0234fbbb" name="response"/>
+	</flow>
+	<flow name="vm.DynamicRouting" doc:id="364003d4-966b-4556-8ae5-df01a4b98a13" >
+		<http:listener doc:name="Listener" doc:id="4450e6c6-9000-4fab-a72a-705c82b0633a" config-ref="HTTP_Listener_config" path="/dynamic-routing" allowedMethods="POST"/>
+		<vm:publish doc:name="Publish" doc:id="5adc60b4-ecdd-4681-b7b0-044579549a7d" config-ref="VM_Config" queueName="#[payload.destination]">
+		</vm:publish>
+	</flow>
+	<flow name="listener.Async.Dynamic.Routing" doc:id="3089a1a8-5f41-434c-81a0-b9d4616f64c6" >
+		<vm:listener doc:name="Listener" doc:id="1af21055-a180-452b-8c30-c3c7f6d70386" config-ref="VM_Config" queueName="queue.A"/>
+		<logger level="INFO" doc:name="Logger A" doc:id="0efb0bcb-f97d-4c5f-b125-b059b2fdb7b6" message='#["This is Queue A A A A"]'/>
+	</flow>
+	<flow name="que.B.Listener.Dynamic.Routing" doc:id="31b514f9-5983-4dd8-b279-a743f0fcfc61" >
+		<vm:listener doc:name="Listener" doc:id="c0caf320-cf81-46eb-8c5e-09ebcce50065" config-ref="VM_Config" queueName="queue.B"/>
+		<logger level="INFO" doc:name="Logger B" doc:id="b0057a16-e45a-4c19-a0ed-40769f39dd58" message='#[" this is queue B B B B"]'/>
+	</flow>
+	<flow name="response" doc:id="6a9e689b-fa53-4d1c-9fd1-9e07e0de0bd0" >
+		<logger level="INFO" doc:name="Logger" doc:id="ac4b107a-45ea-49a1-b5d2-4577e8bf1fa9" message="#[payload]"/>
+	</flow>
+</mule>
